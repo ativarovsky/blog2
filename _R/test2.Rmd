@@ -1,13 +1,18 @@
 ---
-title: "test"
+title: "Visualizing Maternal Mortality with `ggplot2`"
 author: "Alice Tivarovsky"
-date: "7/5/2020"
+date: "7/10/2020"
 layout: posts
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Source 
+https://www.cdc.gov/nchs/data_access/vitalstatsonline.htm#Mortality_Multiple
+
+## Motivation
 
 ## R Markdown
 

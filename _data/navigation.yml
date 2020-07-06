@@ -3,7 +3,7 @@ main:
   - title: "Blog"
     url: /posts
   - title: "Resum&eacute;"
-    url: /assets/resume.html
+    url: /resume
   - title: "About"
     icon: "fas fa-fw fa-envelope-square"
     url: "mailto:ativarovsky@gmail.com"
