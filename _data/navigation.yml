@@ -7,4 +7,7 @@ main:
   - title: "About"
     icon: "fas fa-fw fa-envelope-square"
     url: "mailto:ativarovsky@gmail.com"
+  - title: "Projects"
+    url: "mailto:ativarovsky@gmail.com"
+    
 

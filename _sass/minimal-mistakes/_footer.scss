@@ -15,7 +15,7 @@
   animation: $intro-transition;
   -webkit-animation-delay: 0.45s;
   animation-delay: 0.45s;
-  background-color: $footer-background-color;
+  background-color: $muted-text-color;
 
   footer {
     @include clearfix;
