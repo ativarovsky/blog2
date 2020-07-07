@@ -1,7 +1,17 @@
 ---
 title: Phthalate Exposure in U.S. Women of Reproductive Age - an NHANES Review, Part I 
-author: Alice Tivarovsky
+output:
+  md_document:
+    preserve_yaml: TRUE
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "../_posts") })
+author: "alice"
+date: '2020-05-15'
+excerpt: ""
 layout: post
+categories:
+  - R Markdown
+  - Jekyll
 ---
 # Motivation
 Perhaps I’m the type of person that worries excessively about things outside of their control, but I’ve long been concerned about plastics leaching into our bodies from things like food packaging and personal care products. 
