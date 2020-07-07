@@ -1,6 +1,6 @@
 ---
 title: Phthalate Exposure in U.S. Women of Reproductive Age - an NHANES Review, Part I
-layout: posts
+layout: single
 ---
 # Motivation
 Perhaps I’m the type of person that worries excessively about things outside of their control, but I’ve long been concerned about plastics leaching into our bodies from things like food packaging and personal care products. 
