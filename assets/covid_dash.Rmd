@@ -1,0 +1,197 @@
+---
+title: "Covid-19"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    source_code: embed
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(coronavirus)
+library(plotly)
+library(viridis)
+library(wbstats)
+library(DT)
+library(leaflet)
+
+#devtools::install_github("RamiKr3ispin/coronavirus", force = TRUE)
+
+data("coronavirus")
+
+daily_df = 
+  coronavirus %>% 
+  group_by(date, type) %>% 
+  summarize(n = sum(cases)) 
+
+max_date = max(coronavirus$date) 
+
+# pull in population
+pop = wb(indicator = "SP.POP.TOTL", startdate = 2018, enddate = 2019) %>% 
+  select(date, country, value) %>% 
+  filter(date == "2018") %>% 
+  mutate(country = recode(country, "United States" = "US", "Czech Republic" = "Czechia", "Korea, Rep." = "Korea, South", "Iran, Islamic Rep." = "Iran", "Russian Federation" = "Russia")) 
+ #%>% rename("Country.Region" = "country")
+
+rates = left_join(coronavirus, pop, by = "country") %>% 
+  group_by(country, type) %>% 
+  summarize(total = sum(cases), population = mean(value)) %>% 
+  pivot_wider(names_from = type, values_from = total) %>% 
+  filter(confirmed > 5000) %>% 
+  mutate(case_rate = confirmed/population, 
+         death_rate = death/confirmed) 
+
+# US boxes
+us_total = coronavirus %>% 
+  select(country, type, cases) %>% 
+  filter(type == "confirmed", country == "US") %>% 
+  group_by(type) %>% 
+  summarize(n = sum(cases))
+us_total_color = "#1f77b4"
+
+us_dead = coronavirus %>% 
+  filter(type == "death",  country == "US") %>% 
+  select(country, type, cases)  %>% 
+  group_by(type) %>% 
+  summarize(n = sum(cases))
+
+us_new_cases = coronavirus %>% 
+    filter(type == "confirmed",  country == "US", date == max_date) %>% 
+    select(country, type, cases)  %>% 
+    group_by(type) %>% 
+    summarize(n = sum(cases))
+
+us_new_deaths = coronavirus %>% 
+    filter(type == "death",  country == "US", date == max_date) %>% 
+    select(country, type, cases)  %>% 
+    group_by(type) %>% 
+    summarize(n = sum(cases))
+
+# World boxes
+world_total = coronavirus %>% 
+  select(type, cases) %>% 
+  filter(type == "confirmed") %>% 
+  group_by(type) %>% 
+  summarize(n = sum(cases))
+
+world_total_color = "#38d6b7"
+
+world_dead = coronavirus %>% 
+  filter(type == "death") %>% 
+  select(country, type, cases)  %>% 
+  group_by(type) %>% 
+  summarize(n = sum(cases))
+
+world_dead_color = "#FF9754"
+
+world_new_cases = coronavirus %>% 
+    filter(type == "confirmed", date == max_date) %>% 
+    select(country, type, cases)  %>% 
+    group_by(type) %>% 
+    summarize(n = sum(cases))
+
+world_new_cases_color = "#6f727a"
+
+world_new_deaths = coronavirus %>% 
+    filter(type == "death", date == max_date) %>% 
+    select(country, type, cases)  %>% 
+    group_by(type) %>% 
+    summarize(n = sum(cases))
+
+world_new_deaths_color = "#FE595E"
+
+```
+
+Home
+======================================================================
+Row {data-height = 100}
+-----------------------------------------------------------------------
+### total {.value-box}
+```{r}
+valueBox(value = format(world_total$n, big.mark = ","), caption = "Confirmed Cases", color = world_total_color, icon = "fas fa-thermometer-half")
+```
+
+### new cases {.value-box}
+```{r}
+valueBox(value = format(world_new_cases$n, big.mark = ","), caption = "New Cases", color = world_new_cases_color, icon = "fas fa-thermometer-full")
+```
+
+### deaths {.value-box}
+```{r}
+valueBox(value = format(world_dead$n, big.mark = ","), caption = "Deaths", color = world_dead_color)
+```
+
+
+### new deaths {.value-box}
+```{r}
+valueBox(value = format(world_new_deaths$n, big.mark = ","), caption = "New Deaths", color = world_new_deaths_color)
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Worldwide Cases by Day
+
+```{r fig.height = 7.5}
+daily_df %>% 
+  plot_ly(x = ~date, 
+          y = ~n, 
+          type = "scatter", 
+          color = ~type, 
+          mode = "markers", 
+          stackgroup = "one") %>% 
+  layout(title = "",
+        yaxis = list(title = "# Cases"),
+        xaxis = list(title = "Date"),
+        legend = list(x = 0.1, y = 0.9),
+        hovermode = "compare")
+
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### Cases and Deaths by Country
+
+```{r fig.height = 10}
+
+rates %>% 
+  plot_ly(y = ~ round(100*case_rate, 2), 
+          x = ~ round(100*death_rate, 2), 
+          size = ~ (confirmed), 
+          color = ~ country, 
+          type = "scatter", 
+          mode = "markers", 
+          marker = list(sizemode = "diameter", opacity = 0.5), 
+          hoverinfo = "text", 
+          text = ~paste("", country, "<br> Confirmed Cases: ", paste(format(confirmed, big.mark = "," )),
+                                            "<br> Case Rate: ", paste(round(100 * case_rate, 2), "%", sep = ""),
+                                            "<br> Death Rate: ", paste(round(100 * death_rate, 2), "%", sep = ""))
+        ) %>% 
+  layout(yaxis = list(title = "Cases per Population", ticksuffix = "%"),
+                xaxis = list(title = "Death Rate", ticksuffix = "%", 
+                             dtick = 1, 
+                             tick0 = 0),
+                hovermode = "compare")
+  
+
+```
+
+### Status Update for `r max_date`
+
+```{r fig.height = 10}
+
+rates %>% 
+  select(-population) %>% 
+  arrange(-confirmed) %>% 
+  rename("Country" = "country", "Confirmed" = "confirmed", "Deaths" = "death", "Case Rate" = "case_rate", "Death Rate" = "death_rate", "Recovered" = "recovered") %>% 
+  select(Country, Confirmed, Recovered, Deaths, everything()) %>% 
+  datatable(options = list(dom = 't')) %>% 
+    formatPercentage("Case Rate", 3) %>% 
+    formatPercentage("Death Rate", 3)
+  
+```
+
