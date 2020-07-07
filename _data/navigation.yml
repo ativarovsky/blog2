@@ -1,13 +1,13 @@
 # main links
 main:
   - title: "Blog"
-    url: /posts
+    url: _pages/posts
   - title: "Resum&eacute;"
-    url: /resume
+    url: _pages/resume
   - title: "About"
-    icon: "fas fa-fw fa-envelope-square"
-    url: "mailto:ativarovsky@gmail.com"
-  - title: "Projects"
-    url: "mailto:ativarovsky@gmail.com"
-    
+    url: _pages/about
+  - title: "Contact"
+    url: _pages/contact
+  - title: "Github"
+    url: "https://github.com/ativarovsky"
 
