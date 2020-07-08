@@ -2,7 +2,7 @@
 title: "test"
 author: "Alice Tivarovsky"
 date: "7/5/2020"
-layout: posts
+layout: single
 ---
 
 

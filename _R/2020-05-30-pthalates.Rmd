@@ -3,15 +3,15 @@ title: Phthalate Exposure in U.S. Women of Reproductive Age - an NHANES Review, 
 output:
   md_document:
     preserve_yaml: TRUE
-knit: (function(inputFile, encoding) {
-  rmarkdown::render(inputFile, encoding = encoding, output_dir = "../_posts") })
+always_allow_html: true
 author: "alice"
 date: '2020-05-15'
 excerpt: ""
-layout: post
+layout: single
+htmlwidgets: TRUE
 categories:
-  - R Markdown
-  - Jekyll
+  - Environment
+  - NHANES
 ---
 # Motivation
 Perhaps I’m the type of person that worries excessively about things outside of their control, but I’ve long been concerned about plastics leaching into our bodies from things like food packaging and personal care products. 
@@ -236,7 +236,7 @@ sp_plot =
   ) +
   theme(text = element_text(size = 9)) + scale_colour_viridis_d(option = "inferno")
 
-ggplotly(sp_plot)
+sp_plotly = ggplotly(sp_plot)
 
 ```
 Immediately, it's clear that MEP stands out. Peaking during the 2005-2006 cycle at 628.92 $\mu$g/g creatinine, MEP represented more than six times the biomarker concentration of the next highest phthalate, MECPP. Following the peak, the concentration fell sharply in 2007-2008 and continued to decline through next four cycles. All other phthalates also show a general decline over time. 
