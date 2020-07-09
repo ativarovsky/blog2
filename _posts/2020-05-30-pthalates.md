@@ -1,14 +1,9 @@
 ---
 title: Phthalate Exposure in U.S. Women of Reproductive Age - an NHANES Review, Part I 
-output:
-  md_document:
-    preserve_yaml: TRUE
-always_allow_html: true
 author: "alice"
 date: '2020-05-15'
 excerpt: ""
 layout: single
-htmlwidgets: TRUE
 categories:
   - Environment
   - NHANES
@@ -175,7 +170,7 @@ all_data =
   select(-c(INDHHINC, INDHHIN2, INDFMINC, INDFMIN2))
 {% endhighlight %}
 
-Finally, we will add variables for creatinine-adjusted phthalate concentrations. There is, however, a units mismatch we'll need to deal with. Creatinine is measured in mg/dL and all phthalate biomarkers are measured in ng/mL. Creatinine adjusted measures are reported here (and often in literature) in units of $\mu$g phthalate/g creatinine. To get to these final units, we multiply the phthalate concentration by 100 and divide by creatinine [^1]. Adjusted values are denoted with a `_c`. 
+Finally, we will add variables for creatinine-adjusted phthalate concentrations. There is, however, a units mismatch we'll need to deal with. Creatinine is measured in mg/dL and all phthalate biomarkers are measured in ng/mL. Creatinine adjusted measures are reported here (and often in literature) in units of \\(\mu\\)g phthalate/g creatinine. To get to these final units, we multiply the phthalate concentration by 100 and divide by creatinine [^1]. Adjusted values are denoted with a `_c`. 
  
 
 {% highlight r %}
@@ -249,20 +244,20 @@ means_c %>%
 
 
 {% highlight text %}
-## # A tibble: 10 x 3
-## # Groups:   cycle [1]
-##    cycle     chemical_c                                        median_c
-##    <chr>     <chr>                                                <dbl>
-##  1 2005-2006 Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)   18.7  
-##  2 2005-2006 Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)       13.2  
-##  3 2005-2006 Mono-(2-ethyl)-hexyl phthalate (MEHP_c)              3.13 
-##  4 2005-2006 Mono-(3-carboxypropyl) phthalate (MCPP_c)            1.84 
-##  5 2005-2006 Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)    29.8  
-##  6 2005-2006 Mono-benzyl phthalate (MBzP_c)                       8.76 
-##  7 2005-2006 Mono-ethyl phthalate (MEP_c)                       132.   
-##  8 2005-2006 Mono-isobutyl phthalate (MiBP_c)                     5.87 
-##  9 2005-2006 Mono-isononyl phthalate (MiNP_c)                     0.917
-## 10 2005-2006 Mono-n-butyl phthalate (MnBP_c)                     20.4
+# A tibble: 10 x 3
+# Groups:   cycle [1]
+   cycle     chemical_c                                        median_c
+   <chr>     <chr>                                                <dbl>
+ 1 2005-2006 Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)   18.7  
+ 2 2005-2006 Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)       13.2  
+ 3 2005-2006 Mono-(2-ethyl)-hexyl phthalate (MEHP_c)              3.13 
+ 4 2005-2006 Mono-(3-carboxypropyl) phthalate (MCPP_c)            1.84 
+ 5 2005-2006 Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)    29.8  
+ 6 2005-2006 Mono-benzyl phthalate (MBzP_c)                       8.76 
+ 7 2005-2006 Mono-ethyl phthalate (MEP_c)                       132.   
+ 8 2005-2006 Mono-isobutyl phthalate (MiBP_c)                     5.87 
+ 9 2005-2006 Mono-isononyl phthalate (MiNP_c)                     0.917
+10 2005-2006 Mono-n-butyl phthalate (MnBP_c)                     20.4  
 {% endhighlight %}
 Now that we've gone through this sanity check, we're back to figuring out why MEP stands out from the pack. And to be honest, after scouring the bowels of the internet, I didn't find a smoking gun. We do know that MEP is the primary metabolite of Diethyl Phthalate (DEP), which, like other phthalates, is used as a plasticizer for rigid materials including toys and toothbrushes. Unlike other phthalates, however, DEP is also used as a solvent in liquid cosmetics and perfumes [@CDC_DEP]. As such, the route of exposure is not only oral but also topical, perhaps explaining some of this unique trajectory. 
 
@@ -494,9 +489,9 @@ all_data_c %>%
 
 
 {% highlight text %}
-##                  household_income family_income
-## household_income        1.0000000     0.9095916
-## family_income           0.9095916     1.0000000
+                 household_income family_income
+household_income        1.0000000     0.9095916
+family_income           0.9095916     1.0000000
 {% endhighlight %}
 
 Since the Pearson correlation coefficient is very high, we can choose either. I chose annual family income to account for younger women, or women that reside with family. 

@@ -22,6 +22,7 @@ gem "minimal-mistakes-jekyll"
 #   gem "jekyll-gist"
 #   gem "jekyll-feed"
 gem "jekyll-include-cache"
+gem 'jekyll-latex'
 #
 # If you have any other plugins, put them here!
 group :jekyll_plugins do

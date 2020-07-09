@@ -1,14 +1,9 @@
 ---
 title: Phthalate Exposure in U.S. Women of Reproductive Age - an NHANES Review, Part I 
-output:
-  md_document:
-    preserve_yaml: TRUE
-always_allow_html: true
 author: "alice"
 date: '2020-05-15'
 excerpt: ""
 layout: single
-htmlwidgets: TRUE
 categories:
   - Environment
   - NHANES
@@ -179,7 +174,7 @@ all_data =
 
 ```
 
-Finally, we will add variables for creatinine-adjusted phthalate concentrations. There is, however, a units mismatch we'll need to deal with. Creatinine is measured in mg/dL and all phthalate biomarkers are measured in ng/mL. Creatinine adjusted measures are reported here (and often in literature) in units of $\mu$g phthalate/g creatinine. To get to these final units, we multiply the phthalate concentration by 100 and divide by creatinine [^1]. Adjusted values are denoted with a `_c`. 
+Finally, we will add variables for creatinine-adjusted phthalate concentrations. There is, however, a units mismatch we'll need to deal with. Creatinine is measured in mg/dL and all phthalate biomarkers are measured in ng/mL. Creatinine adjusted measures are reported here (and often in literature) in units of \\(\mu\\)g phthalate/g creatinine. To get to these final units, we multiply the phthalate concentration by 100 and divide by creatinine [^1]. Adjusted values are denoted with a `_c`. 
  
 ```{r creatinine adjusted variables}
 all_data_c = 

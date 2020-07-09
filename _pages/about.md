@@ -4,7 +4,6 @@ title: About
 author_profile: true
 ---
 
-
 ### Education
 - BS, Chemical Engineering - UCLA
 - MPH, Epidemiology & Applied biostatistics - Columbia University
