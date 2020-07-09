@@ -4,6 +4,7 @@ author: "alice"
 date: '2020-05-15'
 excerpt: ""
 layout: single
+htmlwidgets: true
 categories:
   - Environment
   - NHANES
@@ -34,7 +35,7 @@ Although there is a [library](https://cran.r-project.org/web/packages/RNHANES/in
 
 ### Libraries
 
-{% highlight r %}
+```r
 library(tidyverse)
 library(foreign)
 library(stats)
@@ -44,13 +45,13 @@ library(plotly)
 library(kableExtra)
 library(gridExtra)
 library(sjPlot)
-{% endhighlight %}
+```
 
 ### Data Import
 First, we read in NHANES cycles 2003 - 2004, 2005 - 2006, 2007 - 2008, 2009 - 2010, 2011 - 2012, 2013 - 2014, and 2015-2016. As of June 2020, phthalate data for 2017 - 2018 was not yet available. The NHANES [datasets](https://wwwn.cdc.gov/nchs/nhanes/default.aspx) used are Demographics (DEMO) and Phthalates and Plasticizers Metabolites - Urine (PHTHTE). For the 2015-2016 cycle we also need the Albumin & Creatinine (ALB_CR_I) file since creatinine data were removed from the phthalates files during this cycle (more on creatinine below).
 
 
-{% highlight r %}
+```r
 # reading in 2003 - 2004 data
 demo_03_04 = read.xport("../data/2003_2004_DEMO_C.XPT")
 phthalate_03_04 = read.xport("../data/2003_2004_PHTHTE_C.XPT.txt")
@@ -79,14 +80,14 @@ phthalate_13_14 = read.xport("../data/2013_2014_PHTHTE_H.XPT.txt")
 demo_15_16 = read.xport("../data/2015_2016_DEMO_I.XPT.txt")
 phthalate_15_16 = read.xport("../data/2015_2016_PHTHTE_I.XPT.txt")
 creat_15_16 = read.xport("../data/2015_2016_ALB_CR_I.XPT.txt")
-{% endhighlight %}
+```
 
 
 ### Data Tidy
 Next we'll bind the data files for each cycle using left-joins, merging on the unique identifier `SEQN`.
 
 
-{% highlight r %}
+```r
 data_03_04 = 
   left_join(demo_03_04, phthalate_03_04, by = "SEQN") %>% 
   mutate(cycle = "2003-2004")
@@ -118,7 +119,7 @@ data_15_16 =
 
 all_data = 
   bind_rows(data_03_04, data_05_06, data_07_08, data_09_10, data_11_12, data_13_14, data_15_16) 
-{% endhighlight %}
+```
 
 
 #### Variables Used
@@ -155,7 +156,7 @@ Below are the NHANES variables used, along with abbreviations for phthalate name
 
 
 
-{% highlight r %}
+```r
 # select variables of interest, drop every observation without biomarker data, filter out women aged 20-44, and consolidate household and family income variables
 all_data = 
   all_data %>% 
@@ -168,12 +169,12 @@ all_data =
     family_income = if_else(cycle %in% c("2003-2004", "2005-2006"), INDFMINC, INDFMIN2)
     ) %>% 
   select(-c(INDHHINC, INDHHIN2, INDFMINC, INDFMIN2))
-{% endhighlight %}
+```
 
 Finally, we will add variables for creatinine-adjusted phthalate concentrations. There is, however, a units mismatch we'll need to deal with. Creatinine is measured in mg/dL and all phthalate biomarkers are measured in ng/mL. Creatinine adjusted measures are reported here (and often in literature) in units of \\(\mu\\)g phthalate/g creatinine. To get to these final units, we multiply the phthalate concentration by 100 and divide by creatinine [^1]. Adjusted values are denoted with a `_c`. 
  
 
-{% highlight r %}
+```r
 all_data_c = 
   all_data %>% 
   mutate(mecpp_c = 100*mecpp/creatinine, 
@@ -188,14 +189,14 @@ all_data_c =
          mcnp_c = 100*mcnp/creatinine,
          mcop_c = 100*mcop/creatinine, 
          minp_c = 100*minp/creatinine)
-{% endhighlight %}
+```
 
 ### Question 1: What phthalates are present in women in the US, what are the average levels of these chemicals, and how have these levels changed over time?
 
 After I set about answering the first question, I realized that the most interesting part is the temporal aspect. If there were spikes in certain phthalates, for instance, that would narrow my focus going forward. Conversely, if phthalates were steadily decreasing in the population, maybe this would assuage my anxieties and I could find something else to worry about. Either way, I decided to tackle this question first. I used a spaghetti plot to visualize phthalates over the seven cycles of data and added `ggplotly` interactivity to help distinguish one line from the other. 
 
 
-{% highlight r %}
+```r
 means_c = 
   all_data_c %>% 
   select(-c(gender:mbzp), -c(SEQN, mcnp, mcop, mcnp_c, mcop_c)) %>% 
@@ -228,37 +229,40 @@ sp_plot =
   ) +
   theme(text = element_text(size = 9)) + scale_colour_viridis_d(option = "inferno")
 
-sp_plotly = ggplotly(sp_plot)
-{% endhighlight %}
+ggplotly(sp_plot)
+```
+
+<div class="figure">
+<!--html_preserve--><div id="htmlwidget-8c831a721f1561d66cb8" style="width:600px;height:600px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8c831a721f1561d66cb8">{"x":{"data":[{"x":[1,2,3,4,5,6,7],"y":[56.1317725095253,71.1213088191594,47.8599945680783,20.5723899794901,18.1954213545438,9.25407667870049,11.2410649769371],"text":["chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />cycle: 2003-2004<br />mean_c:  56.131773","chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />cycle: 2005-2006<br />mean_c:  71.121309","chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />cycle: 2007-2008<br />mean_c:  47.859995","chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />cycle: 2009-2010<br />mean_c:  20.572390","chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />cycle: 2011-2012<br />mean_c:  18.195421","chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />cycle: 2013-2014<br />mean_c:   9.254077","chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />chemical_c: Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)<br />cycle: 2015-2016<br />mean_c:  11.241065"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,0,4,1)","dash":"solid"},"hoveron":"points","name":"Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)","legendgroup":"Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[37.9598466599974,47.9622325643997,26.1414726018942,12.5603936489677,11.8178805357524,5.87326787717119,6.95626987119515],"text":["chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />cycle: 2003-2004<br />mean_c:  37.959847","chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />cycle: 2005-2006<br />mean_c:  47.962233","chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />cycle: 2007-2008<br />mean_c:  26.141473","chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />cycle: 2009-2010<br />mean_c:  12.560394","chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />cycle: 2011-2012<br />mean_c:  11.817881","chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />cycle: 2013-2014<br />mean_c:   5.873268","chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />chemical_c: Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)<br />cycle: 2015-2016<br />mean_c:   6.956270"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(27,12,66,1)","dash":"solid"},"hoveron":"points","name":"Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)","legendgroup":"Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[9.99278497880825,13.1671183141721,8.73815800086235,3.69438550065612,4.47177900622704,2.45005691556301,2.74735876731144],"text":["chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />cycle: 2003-2004<br />mean_c:   9.992785","chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />cycle: 2005-2006<br />mean_c:  13.167118","chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />cycle: 2007-2008<br />mean_c:   8.738158","chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />cycle: 2009-2010<br />mean_c:   3.694386","chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />cycle: 2011-2012<br />mean_c:   4.471779","chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />cycle: 2013-2014<br />mean_c:   2.450057","chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />chemical_c: Mono-(2-ethyl)-hexyl phthalate (MEHP_c)<br />cycle: 2015-2016<br />mean_c:   2.747359"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(75,12,107,1)","dash":"solid"},"hoveron":"points","name":"Mono-(2-ethyl)-hexyl phthalate (MEHP_c)","legendgroup":"Mono-(2-ethyl)-hexyl phthalate (MEHP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[3.24823865307215,3.26268386364904,4.49724272815392,5.37775055234306,10.2908950162625,5.22063454376074,2.16577377054881],"text":["chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />cycle: 2003-2004<br />mean_c:   3.248239","chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />cycle: 2005-2006<br />mean_c:   3.262684","chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />cycle: 2007-2008<br />mean_c:   4.497243","chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />cycle: 2009-2010<br />mean_c:   5.377751","chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />cycle: 2011-2012<br />mean_c:  10.290895","chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />cycle: 2013-2014<br />mean_c:   5.220635","chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />chemical_c: Mono-(3-carboxypropyl) phthalate (MCPP_c)<br />cycle: 2015-2016<br />mean_c:   2.165774"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(120,28,109,1)","dash":"solid"},"hoveron":"points","name":"Mono-(3-carboxypropyl) phthalate (MCPP_c)","legendgroup":"Mono-(3-carboxypropyl) phthalate (MCPP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[79.2952044186525,93.2461710029894,63.8871076234474,30.5874194281034,27.206444419551,14.5669955903277,19.3295550156809],"text":["chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />cycle: 2003-2004<br />mean_c:  79.295204","chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />cycle: 2005-2006<br />mean_c:  93.246171","chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />cycle: 2007-2008<br />mean_c:  63.887108","chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />cycle: 2009-2010<br />mean_c:  30.587419","chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />cycle: 2011-2012<br />mean_c:  27.206444","chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />cycle: 2013-2014<br />mean_c:  14.566996","chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />chemical_c: Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)<br />cycle: 2015-2016<br />mean_c:  19.329555"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(165,44,96,1)","dash":"solid"},"hoveron":"points","name":"Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)","legendgroup":"Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[16.7459134329851,14.1392304270737,14.8716322228646,11.2232160904095,8.69832685691784,9.90055500966045,8.62197756618394],"text":["chemical_c: Mono-benzyl phthalate (MBzP_c)<br />chemical_c: Mono-benzyl phthalate (MBzP_c)<br />cycle: 2003-2004<br />mean_c:  16.745913","chemical_c: Mono-benzyl phthalate (MBzP_c)<br />chemical_c: Mono-benzyl phthalate (MBzP_c)<br />cycle: 2005-2006<br />mean_c:  14.139230","chemical_c: Mono-benzyl phthalate (MBzP_c)<br />chemical_c: Mono-benzyl phthalate (MBzP_c)<br />cycle: 2007-2008<br />mean_c:  14.871632","chemical_c: Mono-benzyl phthalate (MBzP_c)<br />chemical_c: Mono-benzyl phthalate (MBzP_c)<br />cycle: 2009-2010<br />mean_c:  11.223216","chemical_c: Mono-benzyl phthalate (MBzP_c)<br />chemical_c: Mono-benzyl phthalate (MBzP_c)<br />cycle: 2011-2012<br />mean_c:   8.698327","chemical_c: Mono-benzyl phthalate (MBzP_c)<br />chemical_c: Mono-benzyl phthalate (MBzP_c)<br />cycle: 2013-2014<br />mean_c:   9.900555","chemical_c: Mono-benzyl phthalate (MBzP_c)<br />chemical_c: Mono-benzyl phthalate (MBzP_c)<br />cycle: 2015-2016<br />mean_c:   8.621978"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(207,68,70,1)","dash":"solid"},"hoveron":"points","name":"Mono-benzyl phthalate (MBzP_c)","legendgroup":"Mono-benzyl phthalate (MBzP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[481.359316089068,634.142881654234,272.356859134769,253.397947751734,194.520374750077,144.475701652891,131.846349595601],"text":["chemical_c: Mono-ethyl phthalate (MEP_c)<br />chemical_c: Mono-ethyl phthalate (MEP_c)<br />cycle: 2003-2004<br />mean_c: 481.359316","chemical_c: Mono-ethyl phthalate (MEP_c)<br />chemical_c: Mono-ethyl phthalate (MEP_c)<br />cycle: 2005-2006<br />mean_c: 634.142882","chemical_c: Mono-ethyl phthalate (MEP_c)<br />chemical_c: Mono-ethyl phthalate (MEP_c)<br />cycle: 2007-2008<br />mean_c: 272.356859","chemical_c: Mono-ethyl phthalate (MEP_c)<br />chemical_c: Mono-ethyl phthalate (MEP_c)<br />cycle: 2009-2010<br />mean_c: 253.397948","chemical_c: Mono-ethyl phthalate (MEP_c)<br />chemical_c: Mono-ethyl phthalate (MEP_c)<br />cycle: 2011-2012<br />mean_c: 194.520375","chemical_c: Mono-ethyl phthalate (MEP_c)<br />chemical_c: Mono-ethyl phthalate (MEP_c)<br />cycle: 2013-2014<br />mean_c: 144.475702","chemical_c: Mono-ethyl phthalate (MEP_c)<br />chemical_c: Mono-ethyl phthalate (MEP_c)<br />cycle: 2015-2016<br />mean_c: 131.846350"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(237,105,37,1)","dash":"solid"},"hoveron":"points","name":"Mono-ethyl phthalate (MEP_c)","legendgroup":"Mono-ethyl phthalate (MEP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[6.397093519366,9.85433048680007,12.5905056859069,12.7110541594219,10.8162132252463,11.7444695550205,13.2512655659892],"text":["chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />cycle: 2003-2004<br />mean_c:   6.397094","chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />cycle: 2005-2006<br />mean_c:   9.854330","chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />cycle: 2007-2008<br />mean_c:  12.590506","chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />cycle: 2009-2010<br />mean_c:  12.711054","chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />cycle: 2011-2012<br />mean_c:  10.816213","chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />cycle: 2013-2014<br />mean_c:  11.744470","chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />chemical_c: Mono-isobutyl phthalate (MiBP_c)<br />cycle: 2015-2016<br />mean_c:  13.251266"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(251,154,6,1)","dash":"solid"},"hoveron":"points","name":"Mono-isobutyl phthalate (MiBP_c)","legendgroup":"Mono-isobutyl phthalate (MiBP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[1.57438881151627,2.68132352322907,1.87878476996346,3.39540469331367,4.90755524915638,3.3425619064989,2.20937592907465],"text":["chemical_c: Mono-isononyl phthalate (MiNP_c)<br />chemical_c: Mono-isononyl phthalate (MiNP_c)<br />cycle: 2003-2004<br />mean_c:   1.574389","chemical_c: Mono-isononyl phthalate (MiNP_c)<br />chemical_c: Mono-isononyl phthalate (MiNP_c)<br />cycle: 2005-2006<br />mean_c:   2.681324","chemical_c: Mono-isononyl phthalate (MiNP_c)<br />chemical_c: Mono-isononyl phthalate (MiNP_c)<br />cycle: 2007-2008<br />mean_c:   1.878785","chemical_c: Mono-isononyl phthalate (MiNP_c)<br />chemical_c: Mono-isononyl phthalate (MiNP_c)<br />cycle: 2009-2010<br />mean_c:   3.395405","chemical_c: Mono-isononyl phthalate (MiNP_c)<br />chemical_c: Mono-isononyl phthalate (MiNP_c)<br />cycle: 2011-2012<br />mean_c:   4.907555","chemical_c: Mono-isononyl phthalate (MiNP_c)<br />chemical_c: Mono-isononyl phthalate (MiNP_c)<br />cycle: 2013-2014<br />mean_c:   3.342562","chemical_c: Mono-isononyl phthalate (MiNP_c)<br />chemical_c: Mono-isononyl phthalate (MiNP_c)<br />cycle: 2015-2016<br />mean_c:   2.209376"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(247,208,60,1)","dash":"solid"},"hoveron":"points","name":"Mono-isononyl phthalate (MiNP_c)","legendgroup":"Mono-isononyl phthalate (MiNP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[37.8824076946198,30.4842116231416,31.9969441199587,63.9225654739426,17.9024470402083,13.5856706047327,14.4248270536611],"text":["chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />cycle: 2003-2004<br />mean_c:  37.882408","chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />cycle: 2005-2006<br />mean_c:  30.484212","chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />cycle: 2007-2008<br />mean_c:  31.996944","chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />cycle: 2009-2010<br />mean_c:  63.922565","chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />cycle: 2011-2012<br />mean_c:  17.902447","chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />cycle: 2013-2014<br />mean_c:  13.585671","chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />chemical_c: Mono-n-butyl phthalate (MnBP_c)<br />cycle: 2015-2016<br />mean_c:  14.424827"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(252,255,164,1)","dash":"solid"},"hoveron":"points","name":"Mono-n-butyl phthalate (MnBP_c)","legendgroup":"Mono-n-butyl phthalate (MnBP_c)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":37.6521378165214,"r":7.30593607305936,"b":32.4782067247821,"l":37.2602739726027},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":11.9551681195517},"title":{"text":"Figure 1: Mean creatinine-adjusted phthalate concentration <br /> by NHANES cycle in women aged 20 - 44 (n = 2,754)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.346201743462},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,7.6],"tickmode":"array","ticktext":["2003-2004","2005-2006","2007-2008","2009-2010","2011-2012","2013-2014","2015-2016"],"tickvals":[1,2,3,4,5,6,7],"categoryorder":"array","categoryarray":["2003-2004","2005-2006","2007-2008","2009-2010","2011-2012","2013-2014","2015-2016"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":9.56413449564135},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"NHANES Cycle","font":{"color":"rgba(0,0,0,1)","family":"","size":11.9551681195517}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-30.0540358306196,665.77130629637],"tickmode":"array","ticktext":["0","200","400","600"],"tickvals":[0,200,400,600],"categoryorder":"array","categoryarray":["0","200","400","600"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":9.56413449564135},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Phthalate oncentration (ug/g creatinine)","font":{"color":"rgba(0,0,0,1)","family":"","size":11.9551681195517}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":9.56413449564135},"y":0.949381327334083},"annotations":[{"text":"chemical_c","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.9551681195517},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"67756df0fb6c":{"colour":{},"x":{},"y":{},"type":"scatter"}},"cur_data":"67756df0fb6c","visdat":{"67756df0fb6c":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+</div>
 Immediately, it's clear that MEP stands out. Peaking during the 2005-2006 cycle at 628.92 $\mu$g/g creatinine, MEP represented more than six times the biomarker concentration of the next highest phthalate, MECPP. Following the peak, the concentration fell sharply in 2007-2008 and continued to decline through next four cycles. All other phthalates also show a general decline over time. 
 
 What's special about MEP and why did it decline so sharply? At first, I thought maybe there was an issue with the data. Perhaps an error in the 2005-2006 cycle, or, since we looked at means, some extremely influential outliers that drove the mean upward. However, calculating the median (a statistic not susceptible to outliers) below confirms that MEP is still the highest phthalate by far, measuring more than 4 times the mean of the next highest phthalate, MECPP.  
 
 
-{% highlight r %}
+```r
 means_c %>% 
   filter(cycle == "2005-2006") %>% 
   select(cycle, chemical_c, median_c)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
-# A tibble: 10 x 3
-# Groups:   cycle [1]
-   cycle     chemical_c                                        median_c
-   <chr>     <chr>                                                <dbl>
- 1 2005-2006 Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)   18.7  
- 2 2005-2006 Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)       13.2  
- 3 2005-2006 Mono-(2-ethyl)-hexyl phthalate (MEHP_c)              3.13 
- 4 2005-2006 Mono-(3-carboxypropyl) phthalate (MCPP_c)            1.84 
- 5 2005-2006 Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)    29.8  
- 6 2005-2006 Mono-benzyl phthalate (MBzP_c)                       8.76 
- 7 2005-2006 Mono-ethyl phthalate (MEP_c)                       132.   
- 8 2005-2006 Mono-isobutyl phthalate (MiBP_c)                     5.87 
- 9 2005-2006 Mono-isononyl phthalate (MiNP_c)                     0.917
-10 2005-2006 Mono-n-butyl phthalate (MnBP_c)                     20.4  
-{% endhighlight %}
+```
+## # A tibble: 10 x 3
+## # Groups:   cycle [1]
+##    cycle     chemical_c                                        median_c
+##    <chr>     <chr>                                                <dbl>
+##  1 2005-2006 Mono-(2-ethyl-5-hydroxyhexyl) phthalate (MEHHP_c)   18.7  
+##  2 2005-2006 Mono-(2-ethyl-5-oxohexyl) phthalate (MEOHP_c)       13.2  
+##  3 2005-2006 Mono-(2-ethyl)-hexyl phthalate (MEHP_c)              3.13 
+##  4 2005-2006 Mono-(3-carboxypropyl) phthalate (MCPP_c)            1.84 
+##  5 2005-2006 Mono-2-ethyl-5-carboxypentyl phthalate (MECPP_c)    29.8  
+##  6 2005-2006 Mono-benzyl phthalate (MBzP_c)                       8.76 
+##  7 2005-2006 Mono-ethyl phthalate (MEP_c)                       132.   
+##  8 2005-2006 Mono-isobutyl phthalate (MiBP_c)                     5.87 
+##  9 2005-2006 Mono-isononyl phthalate (MiNP_c)                     0.917
+## 10 2005-2006 Mono-n-butyl phthalate (MnBP_c)                     20.4
+```
 Now that we've gone through this sanity check, we're back to figuring out why MEP stands out from the pack. And to be honest, after scouring the bowels of the internet, I didn't find a smoking gun. We do know that MEP is the primary metabolite of Diethyl Phthalate (DEP), which, like other phthalates, is used as a plasticizer for rigid materials including toys and toothbrushes. Unlike other phthalates, however, DEP is also used as a solvent in liquid cosmetics and perfumes [@CDC_DEP]. As such, the route of exposure is not only oral but also topical, perhaps explaining some of this unique trajectory. 
 
 At this point, we might want to pull some information on industrial DEP usage in the US over the past 15 years and perhaps do some research on whether industry/policy changes circa 2005. Ah, but not so fast... After going down this rabbit hole, I learned some enlightening/frustrating information about the history of chemical reporting policies in the US. If this isn't your cup of tea, feel free to skip the following section. 
@@ -276,13 +280,13 @@ We proceed to summarizing the raw and creatinine-adjusted values from the 2015-2
 a high degree of right-skew in the data. To illustrate this, here is a quick histogram of unadjusted MEP levels. 
 
 
-{% highlight r %}
+```r
 all_data %>% 
   ggplot(aes(x = mep)) +
   geom_histogram(binwidth = 500) +
   labs(x = "Unadjusted MEP (ng/mL)", 
        title = "Figure 2: MEP Histogram")
-{% endhighlight %}
+```
 
 ![center](/figs/2020-05-30-pthalates/MEP histogram-1.png)
 
@@ -290,7 +294,7 @@ This right-skew is predictable - most people (thankfully) have very low levels o
 
 
 
-{% highlight r %}
+```r
 # calculating means and medians for phthalate values, not adjusted for creatinine
 means_raw = 
 all_data_c %>% 
@@ -329,7 +333,7 @@ left_join(means_c_15_16, means_raw, by = "id") %>%
   knitr::kable(digits = 1, caption = "Table 1: Phthalate Concentration in Women Ages 20-44, per NHANES 2015-2016 Cycle.") %>% 
   kable_styling(c("striped", "bordered")) %>%
   add_header_above(c(" " = 2, "Unadjusted (ng/mL)" = 2, "Creatinine-Adjusted (ug/g creatinine)" = 2))
-{% endhighlight %}
+```
 
 <table class="table table-striped table-bordered" style="margin-left: auto; margin-right: auto;">
 <caption>Table 1: Phthalate Concentration in Women Ages 20-44, per NHANES 2015-2016 Cycle.</caption>
@@ -480,19 +484,17 @@ Income is measured in NHANES using two categorical variables, __annual household
 It's not immediately clear which variable to use, but one would guess that they're highly correlated. Indeed:
 
 
-{% highlight r %}
+```r
 all_data_c %>% 
   select(household_income, family_income) %>% 
   cor(use = "complete.obs", method = "pearson")
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
-                 household_income family_income
-household_income        1.0000000     0.9095916
-family_income           0.9095916     1.0000000
-{% endhighlight %}
+```
+##                  household_income family_income
+## household_income        1.0000000     0.9095916
+## family_income           0.9095916     1.0000000
+```
 
 Since the Pearson correlation coefficient is very high, we can choose either. I chose annual family income to account for younger women, or women that reside with family. 
 
@@ -505,7 +507,7 @@ Next, I wanted to simplify analysis, make the levels more intuitive, and represe
 
 We will recode the education variable per the levels above, drop refused/don't know/missing income observations, and ask R to interpret the variable type as categorical:
 
-{% highlight r %}
+```r
 all_data_c = 
   all_data_c %>% 
   select(- household_income) %>% 
@@ -520,7 +522,7 @@ all_data_c =
   ) %>%
   filter(!family_income %in% c(20, NA)) %>% 
   mutate(family_income = as.factor(family_income))
-{% endhighlight %}
+```
 
 Working with the education variable is a bit more straightforward. The NHANES categories for adults over 20 years of age are as follows: 
 
@@ -532,19 +534,19 @@ Working with the education variable is a bit more straightforward. The NHANES ca
 
 Thus, all we need to do is drop the refuse/don't know/missing education observations, fix the variable type to categorical, and we're ready to roll. 
 
-{% highlight r %}
+```r
 all_data_c = 
   all_data_c %>% 
   drop_na(education) %>% 
   filter(education %in% c(1:5)) %>% 
   mutate(education = as.factor(education))
-{% endhighlight %}
+```
 
 ### Visualization 
 Here we'll look at some boxplots to eyeball trends. We won't plot every phthalate because there's a lot of them and the intent here is exploratory. Instead we'll choose a handful of common ones, including those from both the low and high molecular weight categories. 
 
 
-{% highlight r %}
+```r
 # relabel education and income
 box_plot_data = 
   all_data_c %>% 
@@ -585,11 +587,11 @@ minp_1 =
     )
 
 grid.arrange(mep_1, mehp_1, minp_1, top = "Figure 3: Income vs Phthalates")
-{% endhighlight %}
+```
 
 ![center](/figs/2020-05-30-pthalates/boxplots-1.png)
 
-{% highlight r %}
+```r
 # education boxplots
 mep_2 = 
   box_plot_data %>% 
@@ -622,7 +624,7 @@ minp_2 =
     )
 
 grid.arrange(mep_2, mehp_2, minp_2, top = "Figure 4: Education vs Phthalates")
-{% endhighlight %}
+```
 
 ![center](/figs/2020-05-30-pthalates/boxplots-2.png)
 <br>
@@ -636,7 +638,7 @@ This is where it gets a little tricky. NHANES uses a complex, stratified survey 
 Because of this, it's not enough to put the variables of interest into a model and hit play. Instead, we must utilize the `survey` package and the three survey variables, `WTMEC2YR, SDMVPSU,SDMVSTRA` that we've ignored up to now. The way these variables work is somewhat complicated and we won't go into detail, but you can read all about it [here](https://www.cdc.gov/nchs/data/series/sr_02/sr02-184-508.pdf). For our purposes, we need two steps: 1. create a survey design object using the survey variables and 2. carry out regression modeling using `svyglm`. [This site](https://stats.idre.ucla.edu/r/faq/how-can-i-do-regression-estimation-with-survey-data/) provides a reference for both. 
 
 
-{% highlight r %}
+```r
 # adjust weighting variable for aggregation of 7 cycles
 all_data_c$WTMEC14YR = all_data_c$WTMEC2YR/7
 
@@ -665,7 +667,7 @@ all_data_m =
 
 # create survey design variable
 svy_design = svydesign(id = ~SDMVPSU, strata = ~SDMVSTRA, data = all_data_m, weights = ~WTMEC14YR, nest = TRUE)
-{% endhighlight %}
+```
 
 Whew. Now we're finally ready to model. Based on the variables we're using, our theoretical model takes the following form. Note that because we have two multi-level categorical variables, we need to create _n-1_ "dummy" variables, n being the number of levels (more on dummy variables [here](https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-dummy-coding/)). 
 
@@ -680,7 +682,7 @@ $$education_4 = \{1\ for\ College\ and\ above \ vs <9th\ grade, \ 0\ otherwise\}
 
 The fitted models are calculated below. It'll be a lot of numbers but bear with me. We'll get through it together.  
 
-{% highlight r %}
+```r
 mecpp_model = svyglm(log_mecpp ~ age + family_income + education + creatinine, design = svy_design, data = all_data_m) 
 
 mnbp_model = svyglm(log_mnbp ~ age + family_income + education + creatinine, design = svy_design, data = all_data_m) 
@@ -707,7 +709,7 @@ minp_model = svyglm(log_minp ~ age + family_income + education + creatinine, des
 
 # arranging models into tables
 tab_model(mecpp_model, mnbp_model, mcpp_model, show.stat = TRUE, show.aic = FALSE, title = "Table 2: Regression Results for MECPP, MnBP, and MCPP")
-{% endhighlight %}
+```
 
 <table style="border-collapse:collapse; border:none;">
 <caption style="font-weight: bold; text-align:left;">Table 2: Regression Results for MECPP, MnBP, and MCPP</caption>
@@ -897,10 +899,9 @@ tab_model(mecpp_model, mnbp_model, mcpp_model, show.stat = TRUE, show.aic = FALS
 
 </table>
 
-
-{% highlight r %}
+```r
 tab_model(mep_model, mehhp_model, mehp_model, show.stat = TRUE, show.aic = FALSE,  title = "Table 3: Regression Results for MEP, MEHHP, and MEHP")
-{% endhighlight %}
+```
 
 <table style="border-collapse:collapse; border:none;">
 <caption style="font-weight: bold; text-align:left;">Table 3: Regression Results for MEP, MEHHP, and MEHP</caption>
@@ -1090,10 +1091,9 @@ tab_model(mep_model, mehhp_model, mehp_model, show.stat = TRUE, show.aic = FALSE
 
 </table>
 
-
-{% highlight r %}
+```r
 tab_model(mibp_model, meohp_model, mbzp_model, show.stat = TRUE, show.aic = FALSE,  title = "Table 4: Regression Results for MIBP, MEOHP, and MBZP")
-{% endhighlight %}
+```
 
 <table style="border-collapse:collapse; border:none;">
 <caption style="font-weight: bold; text-align:left;">Table 4: Regression Results for MIBP, MEOHP, and MBZP</caption>
@@ -1283,10 +1283,9 @@ tab_model(mibp_model, meohp_model, mbzp_model, show.stat = TRUE, show.aic = FALS
 
 </table>
 
-
-{% highlight r %}
+```r
 tab_model(mcnp_model, mcop_model, minp_model, show.stat = TRUE, show.aic = FALSE,  title = "Table 5: Regression Results for MCNP, MCOP, and MINP")
-{% endhighlight %}
+```
 
 <table style="border-collapse:collapse; border:none;">
 <caption style="font-weight: bold; text-align:left;">Table 5: Regression Results for MCNP, MCOP, and MINP</caption>

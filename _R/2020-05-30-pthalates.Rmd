@@ -231,7 +231,7 @@ sp_plot =
   ) +
   theme(text = element_text(size = 9)) + scale_colour_viridis_d(option = "inferno")
 
-sp_plotly = ggplotly(sp_plot)
+ggplotly(sp_plot)
 
 ```
 Immediately, it's clear that MEP stands out. Peaking during the 2005-2006 cycle at 628.92 $\mu$g/g creatinine, MEP represented more than six times the biomarker concentration of the next highest phthalate, MECPP. Following the peak, the concentration fell sharply in 2007-2008 and continued to decline through next four cycles. All other phthalates also show a general decline over time. 
