@@ -1,7 +1,7 @@
 ---
-layout: default
-title: Resum&eacute
+layout: single
+title: Contact
 ---
 
-
-<iframe src="https://drive.google.com/file/d/1cShh0Uf7ndkhAhDPeNPBc52fXzdqqB5q/preview" class="gde-frame" style="height: 1000px; width: 100%; border: none;" scrolling="yes"></iframe>
+- Send me an [email](mailto:ativarovsky@gmail.com)
+- Find me on [LinkedIn](https://www.linkedin.com/in/alice-tivarovsky-56281131/)

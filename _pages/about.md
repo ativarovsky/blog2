@@ -1,7 +1,6 @@
 ---
-layout: home
+layout: single
 title: About
-author_profile: true
 ---
 
 ### Education
