@@ -31,3 +31,4 @@ build_article <- function(filename) {
   # store the dependencies where they belong
   brocks::htmlwidgets_deps(source)
 }
+
