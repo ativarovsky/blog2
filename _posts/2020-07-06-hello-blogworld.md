@@ -20,6 +20,7 @@ I used the following tools:
 * [Jekyll](https://jekyllrb.com) installed with the help of [homebrew](https://brew.sh)
 * [Bundler](https://bundler.io) to manage dependencies
 * [Minimal Mistakes](https://mmistakes.github.io/minimal-mistakes/docs/quick-start-guide/)
+* [Github Pages](https://pages.github.com)
 * Some handy tutorials: 
   - [Getting math to render](https://www.cross-validated.com/How-to-render-math-on-Minimal-Mistakes/)
   - [Converting from `.Rmd` to `.md` and preserving html widgets](https://g3rv4.com/2017/08/htmlwidgets-jekyll-rstats)

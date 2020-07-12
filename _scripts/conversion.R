@@ -32,3 +32,4 @@ build_article <- function(filename) {
   brocks::htmlwidgets_deps(source)
 }
 
+# to run: build_article('2017-08-20-some-random-post')
