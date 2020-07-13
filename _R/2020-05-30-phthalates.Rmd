@@ -5,6 +5,7 @@ date: '2020-07-11'
 excerpt: ""
 layout: single
 htmlwidgets: true
+toc: true
 categories:
   - Environment
   - NHANES
